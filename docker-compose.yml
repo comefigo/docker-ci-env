@@ -1,0 +1,95 @@
+version: "3.2"
+services:
+  # gitlab application container
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: gitlab
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - gitlab-conf:/etc/gitlab
+      - gitlab-log:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+    env_file:
+      - common.env
+    depends_on:
+      - gitlab-busybox
+  # jenkins application container
+  jenkins:
+    image: jenkins:latest
+    container_name: jenkins
+    hostname: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    env_file:
+      - common.env
+    depends_on:
+      - jenkins-busybox
+  # redmine application container
+  redmine:
+    image: redmine:latest
+    container_name: redmine
+    hostname: redmine
+    ports:
+      - "3000:3000"
+    volumes:
+      - redmine-files:/usr/src/redmine/files
+    links:
+      - redmine-db
+    env_file:
+      - ./redmine/redmine.env
+      - common.env
+    depends_on:
+      - redmine-db
+      - redmine-busybox
+  # redmine postgres container
+  redmine-db:
+    image: postgres:9.2
+    container_name: redmine-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - redmine-db-data:/var/lib/postgresql/data
+    env_file:
+      - ./redmine/postgres.env
+      - common.env
+    depends_on:
+      - redmine-db-busybox
+  # data store containers
+  gitlab-busybox:
+    image: busybox:latest
+    container_name: gitlab-busybox
+    volumes:
+      - gitlab-conf:/var/gitlab/conf
+      - gitlab-log:/var/gitlab/log
+      - gitlab-data:/var/gitlab/data
+  jenkins-busybox:
+    image: busybox:latest
+    container_name: jenkins-busybox
+    volumes:
+      - jenkins-data:/jenkins_home
+  redmine-busybox:
+    image: busybox:latest
+    container_name: redmine-busybox
+    volumes:
+      - redmine-files:/redmine-files
+  redmine-db-busybox:
+    image: busybox:latest
+    container_name: redmine-db-busybox
+    volumes:
+      - redmine-db-data:/redmine-db-data
+volumes:
+  # gitlab share volumes
+  gitlab-conf:
+  gitlab-log:
+  gitlab-data:
+  # jenkins share volumes
+  jenkins-data:
+  # redmine share volumes
+  redmine-files:
+  redmine-db-data:
