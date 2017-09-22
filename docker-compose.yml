@@ -14,8 +14,6 @@ services:
       - gitlab-data:/var/opt/gitlab
     env_file:
       - common.env
-    depends_on:
-      - gitlab-busybox
   # jenkins application container
   jenkins:
     image: jenkins:latest
@@ -28,8 +26,6 @@ services:
       - jenkins-data:/var/jenkins_home
     env_file:
       - common.env
-    depends_on:
-      - jenkins-busybox
   # redmine application container
   redmine:
     image: redmine:latest
@@ -46,7 +42,6 @@ services:
       - common.env
     depends_on:
       - redmine-db
-      - redmine-busybox
   # redmine postgres container
   redmine-db:
     image: postgres:9.2
@@ -58,31 +53,6 @@ services:
     env_file:
       - ./redmine/postgres.env
       - common.env
-    depends_on:
-      - redmine-db-busybox
-  # data store containers
-  gitlab-busybox:
-    image: busybox:latest
-    container_name: gitlab-busybox
-    volumes:
-      - gitlab-conf:/var/gitlab/conf
-      - gitlab-log:/var/gitlab/log
-      - gitlab-data:/var/gitlab/data
-  jenkins-busybox:
-    image: busybox:latest
-    container_name: jenkins-busybox
-    volumes:
-      - jenkins-data:/jenkins_home
-  redmine-busybox:
-    image: busybox:latest
-    container_name: redmine-busybox
-    volumes:
-      - redmine-files:/redmine-files
-  redmine-db-busybox:
-    image: busybox:latest
-    container_name: redmine-db-busybox
-    volumes:
-      - redmine-db-data:/redmine-db-data
 volumes:
   # gitlab share volumes
   gitlab-conf:
